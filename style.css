@@ -1,3 +1,10 @@
+/*Datepicker input */
+#datepicker-input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
 /* Datepicker*/
 
 .datepicker * {
@@ -27,7 +34,7 @@
 }
 
 .datepicker-container {
-  max-width: 341px;
+  max-width: 290px;
   box-sizing: border-box;
   border-radius: 10px;
   width: 100%;
@@ -40,7 +47,6 @@
   justify-content: space-between;
   padding: 0.6rem;
   background-color: #1976d2;
-  border-bottom: 1px solid #ccc;
   font-size: 1.5rem;
   font-weight: bold;
   min-height: 75px;
@@ -54,7 +60,7 @@
 .datepicker-header button {
   border: none;
   background: none;
-  font-size: 1.15rem;
+  font-size: 1rem;
   font-weight: bold;
   color: #fff;
   cursor: pointer;
@@ -65,11 +71,11 @@
 .datepicker-body {
   display: flex;
   flex-direction: column;
-  padding: 1rem 1rem 0;
+  padding: 0.7rem 1rem 0;
   background-color: #fff;
-  border-bottom: 1px solid #ebebeb;
-  min-height: 320px;
-  max-height: 349px;
+  /* border-bottom: 1px solid #ebebeb; */
+  min-height: 262px;
+  max-height: 262px;
   overflow-y: scroll;
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
@@ -93,12 +99,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 27px;
+  height: 27px;
   border-radius: 50%;
   cursor: pointer;
   transition: background-color 0.2s ease-in-out;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 
 .datepicker-day:hover {
@@ -150,10 +156,11 @@
   transition: color 0.2s ease-in-out;
   border: none;
   background: transparent;
+  min-width: 42px;
 }
 
 .datepicker-header-text {
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: bold;
   color: #000;
   background: transparent;
@@ -184,16 +191,17 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 1rem;
+  padding: 0.4rem;
   cursor: pointer;
-  font-weight: bold;
-  font-size: 1.2rem;
+  /* font-weight: bold; */
+  font-size: 1.05rem;
   font-family: inherit;
   transition: background-color 0.2s ease-in-out;
 }
 
 .active-year {
-  font-size: 1.7rem;
+  font-size: 1.4rem;
+  font-weight: 500;
   color: #0062cc;
 }
 
@@ -235,7 +243,6 @@
 
 .datepicker-footer__button {
   margin-left: 1rem;
-  padding: 0.5rem 1rem;
   border-radius: 0.25rem;
   border: none;
   background-color: transparent;
