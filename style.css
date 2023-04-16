@@ -50,7 +50,7 @@
   font-size: 1.5rem;
   font-weight: bold;
   min-height: 75px;
-  border-radius: 10px 10px 0 0;
+  border-radius: 6px 6px 0 0;
   /* flex-direction: row-reverse; */
   flex-direction: column;
   color: white;
@@ -126,11 +126,12 @@
 /* Datepicker footer */
 .datepicker-footer {
   display: flex;
+  gap: 12px;
   align-items: center;
   justify-content: flex-end;
   padding: 1rem;
   background-color: #fff;
-  border-radius: 0 0 10px 10px;
+  border-radius: 0 0 6px 6px;
 }
 
 .active {
@@ -242,7 +243,6 @@
 }
 
 .datepicker-footer__button {
-  margin-left: 1rem;
   border-radius: 0.25rem;
   border: none;
   background-color: transparent;

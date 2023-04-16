@@ -3,8 +3,12 @@ import { months, monthsShort, daysShort } from "./constants.js";
 let dateSelected = `${new Date().getFullYear()}-${
   new Date().getMonth() + 1
 }-${new Date().getDate()}`;
-let monthSelected = `${new Date().getMonth()}`;
-let yearSelected = `${new Date().getFullYear()}`;
+let monthToday = `${new Date().getMonth()}`;
+let yearToday = `${new Date().getFullYear()}`;
+
+//initialize to today
+let monthSelected = monthToday;
+let yearSelected = yearToday;
 
 // Get the input field and set the date format
 const input = document.getElementById("datepicker-input");
@@ -169,7 +173,7 @@ function setHeaderDateContainerToMonthView(text) {
 function generateYearView() {
   body.innerHTML = "";
   //generate years from 10 years ago the the current year
-  for (let i = Number(yearSelected); i >= Number(yearSelected) - 30; i--) {
+  for (let i = Number(yearToday); i >= Number(yearToday) - 30; i--) {
     const year = document.createElement("div");
     year.classList.add("year-option");
     year.setAttribute("data-year", i);
@@ -179,6 +183,9 @@ function generateYearView() {
 
   body.appendChild(yearBody);
 
+  if (body.querySelector(".active-year")) {
+    body.querySelector(".active-year").classList.remove("active-year");
+  }
   //check which year is selected and add active class to it
   const activeYear = document.querySelector(`[data-year="${yearSelected}"]`);
   if (activeYear) activeYear.className += " active-year";
@@ -253,6 +260,13 @@ function changeCalendarMonth(evt) {
   body.appendChild(calendar);
 }
 
+function removeActiveStateFromMonths() {
+  const months = document.querySelectorAll(".month-gridview");
+  months.forEach((month) => {
+    month.classList.remove("active-month");
+  });
+}
+
 function arrowButtonHandler(direction, type) {
   yearSelected = Number(yearSelected);
   if (type === "month") {
@@ -276,12 +290,12 @@ function arrowButtonHandler(direction, type) {
     if (direction === "next") {
       yearSelected++;
       //generateYearView();
-      console.log("year increased");
     } else if (direction === "prev") {
       yearSelected--;
       //generateYearView();
-      console.log("year decreased");
     }
+    setHeaderDateContainerToMonthView();
+    //removeActiveStateFromMonths();
   }
 }
 
@@ -379,11 +393,25 @@ headerDateContainer.addEventListener("click", (evt) => {
 });
 
 nextButton.addEventListener("click", (evt) => {
-  arrowButtonHandler("next", "month");
+  const isMonthView =
+    document.querySelector(".datepicker-header-text").textContent.indexOf(" ") >
+    0;
+  if (isMonthView) {
+    arrowButtonHandler("next", "month");
+  } else {
+    arrowButtonHandler("next", "year");
+  }
 });
 
 previousButton.addEventListener("click", (evt) => {
-  arrowButtonHandler("prev", "month");
+  const isMonthView =
+    document.querySelector(".datepicker-header-text").textContent.indexOf(" ") >
+    0;
+  if (isMonthView) {
+    arrowButtonHandler("prev", "month");
+  } else {
+    arrowButtonHandler("prev", "year");
+  }
 });
 
 // ok button
