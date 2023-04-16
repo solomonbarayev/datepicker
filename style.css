@@ -38,7 +38,7 @@
 .datepicker-header {
   display: flex;
   justify-content: space-between;
-  padding: 1rem;
+  padding: 0.6rem;
   background-color: #1976d2;
   border-bottom: 1px solid #ccc;
   font-size: 1.5rem;
@@ -61,10 +61,6 @@
   transition: color 0.2s ease-in-out;
 }
 
-.datepicker-header button:hover {
-  color: #000;
-}
-
 /* Datepicker body */
 .datepicker-body {
   display: flex;
@@ -75,6 +71,12 @@
   min-height: 320px;
   max-height: 349px;
   overflow-y: scroll;
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+}
+
+.datepicker-body::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
 }
 
 /* Datepicker calendar */
@@ -96,6 +98,7 @@
   border-radius: 50%;
   cursor: pointer;
   transition: background-color 0.2s ease-in-out;
+  font-size: 0.9rem;
 }
 
 .datepicker-day:hover {
@@ -135,6 +138,7 @@
   max-width: 290px;
   margin: 0 auto;
   width: 100%;
+  cursor: pointer;
 }
 
 .datepicker-previous,
@@ -226,6 +230,7 @@
 .datepicker-date-container {
   font-size: 2rem;
   font-weight: 500;
+  line-height: 1.1;
 }
 
 .datepicker-footer__button {
@@ -242,4 +247,8 @@
 
 .datepicker-footer__button:hover {
   background-color: #e0e0e0;
+}
+
+.datepicker-year:hover {
+  color: #dddddd;
 }

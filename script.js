@@ -3,14 +3,8 @@ import { months, monthsShort, daysShort } from "./constants.js";
 let dateSelected = `${new Date().getFullYear()}-${
   new Date().getMonth() + 1
 }-${new Date().getDate()}`;
-let monthSelected = `${new Date().getMonth() + 1}`;
+let monthSelected = `${new Date().getMonth()}`;
 let yearSelected = `${new Date().getFullYear()}`;
-
-const stateView = {
-  calendarView: true,
-  monthView: false,
-  yearView: false,
-};
 
 // Get the input field and set the date format
 const input = document.getElementById("datepicker-input");
@@ -62,9 +56,9 @@ bodyHeader.appendChild(previousButton);
 //create container that holds the header date text
 const headerDateContainer = document.createElement("button");
 headerDateContainer.classList.add("datepicker-header-text");
-headerDateContainer.textContent = `${yearSelected} ${
-  months[Number(monthSelected) - 1]
-}`;
+headerDateContainer.textContent = `${
+  months[Number(monthSelected)]
+} ${yearSelected}`;
 bodyHeader.appendChild(headerDateContainer);
 
 const nextButton = document.createElement("button");
@@ -159,31 +153,6 @@ if (activeYear) activeYear.className += " active-year";
 //add yearBody to yearView
 yearView.appendChild(yearBody);
 
-//buiild a function that generate a header component that contains prev and next buttons on the sides and accepts a parameter that is the current date which is in between
-function setHeader(date) {
-  const monthHeader = document.createElement("div");
-  // monthHeader.classList.add("datepicker-monthHeader");
-
-  const prevButton = document.createElement("button");
-  prevButton.classList.add("prev-button");
-  prevButton.innerHTML = "&lt;";
-  monthHeader.appendChild(prevButton);
-
-  const dateElement = document.createElement("div");
-  dateElement.classList.add("date-element");
-  dateElement.textContent = date;
-  monthHeader.appendChild(dateElement);
-
-  const nextButton = document.createElement("button");
-  nextButton.classList.add("next-button");
-  nextButton.innerHTML = "&gt;";
-  monthHeader.appendChild(nextButton);
-
-  //header.appendChild(monthHeader);
-
-  return monthHeader;
-}
-
 function setHeaderDateContainerToMonthView(text) {
   !text
     ? (headerDateContainer.textContent = yearSelected)
@@ -219,7 +188,6 @@ function generateGridWithMonths() {
   //clear the monthViewGrid
   monthViewGrid.innerHTML = "";
 
-  console.log("generateGridWithMonths");
   for (let i = 0; i < monthsShort.length; i++) {
     const month = document.createElement("div");
     month.classList.add("month-gridview");
@@ -253,7 +221,6 @@ function setDaysOfWeek() {
 }
 
 function changeCalendarMonth(evt) {
-  console.log("changeCalendarMonth");
   const year = yearSelected;
   const month = monthSelected;
   const daysInMonth = new Date(Number(year), Number(month) + 1, 0).getDate();
@@ -282,11 +249,12 @@ function changeCalendarMonth(evt) {
     day.innerHTML = i;
     calendar.appendChild(day);
   }
-  // setHeaderDateContainerToMonthView();S
+
   body.appendChild(calendar);
 }
 
 function arrowButtonHandler(direction, type) {
+  yearSelected = Number(yearSelected);
   if (type === "month") {
     if (direction === "next") {
       if (monthSelected < 11) {
@@ -360,7 +328,6 @@ monthViewGrid.addEventListener("click", (evt) => {
 
     //return to date view
     //body.innerHTML = "";
-    setHeader();
     changeCalendarMonth();
   }
 });
@@ -376,9 +343,6 @@ calendar.addEventListener("click", function (event) {
     const formattedDate = date.toLocaleDateString("en-GB", dateFormat);
     input.value = formattedDate;
     dateSelected = formattedDate;
-
-    // Set the calendar header
-    setHeader(dateSelected);
 
     //close the calendar
     //datepicker.classList.remove("open");
@@ -415,12 +379,10 @@ headerDateContainer.addEventListener("click", (evt) => {
 });
 
 nextButton.addEventListener("click", (evt) => {
-  //evt.stopPropagation();
   arrowButtonHandler("next", "month");
 });
 
 previousButton.addEventListener("click", (evt) => {
-  //evt.stopPropagation();
   arrowButtonHandler("prev", "month");
 });
 
@@ -434,4 +396,11 @@ okButton.addEventListener("click", (evt) => {
 cancelButton.addEventListener("click", (evt) => {
   evt.stopPropagation();
   datepicker.classList.remove("open");
+});
+
+//on yearButton click, show year view
+yearButton.addEventListener("click", (evt) => {
+  evt.stopPropagation();
+  body.innerHTML = "";
+  generateYearView();
 });
