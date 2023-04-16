@@ -16,18 +16,18 @@ export const months = [
 
 //arrary of months in hebrew short names
 export const monthsShort = [
-  "ינו",
-  "פבר",
+  "ינו'",
+  "פבר'",
   "מרץ",
-  "אפר",
+  "אפר'",
   "מאי",
-  "יוני",
-  "יולי",
-  "אוג",
-  "ספט",
-  "אוק",
-  "נוב",
-  "דצמ",
+  "יונ'",
+  "יול'",
+  "אוג'",
+  "ספט'",
+  "אוק'",
+  "נוב'",
+  "דצמ'",
 ];
 
 //array of days in hebrew short names

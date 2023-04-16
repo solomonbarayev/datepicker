@@ -77,11 +77,20 @@ const footer = document.createElement("div");
 footer.classList.add("datepicker-footer");
 datepickerContainer.appendChild(footer);
 
-// Create the today button
-const todayButton = document.createElement("button");
-todayButton.classList.add("datepicker-today");
-todayButton.innerHTML = "Today";
-footer.appendChild(todayButton);
+// Create the datepicker date container
+const dateContainer = document.createElement("div");
+dateContainer.classList.add("datepicker-date-container");
+
+//create two buttons in the footer on is "Ok" and the other is "Cancel"
+const okButton = document.createElement("button");
+okButton.classList.add("datepicker-footer__button");
+okButton.textContent = "בחר";
+footer.appendChild(okButton);
+
+const cancelButton = document.createElement("button");
+cancelButton.classList.add("datepicker-footer__button");
+cancelButton.textContent = "ביטול";
+footer.appendChild(cancelButton);
 
 //function to setActiveDate
 function setActiveDate(event) {
@@ -326,6 +335,9 @@ yearBody.addEventListener("click", (evt) => {
     });
     //add active class to the year that was clicked
     evt.target.className += " active-year";
+
+    //change datepicker-year to the year that was clicked
+    yearButton.textContent = yearSelected;
   }
 
   //return to month view
@@ -357,6 +369,9 @@ monthViewGrid.addEventListener("click", (evt) => {
 calendar.addEventListener("click", function (event) {
   event.stopPropagation();
   if (event.target.classList.contains("datepicker-day")) {
+    //first remove dateContainer
+    //header.removeChild(dateContainer);
+
     const date = new Date(event.target.getAttribute("data-date"));
     const formattedDate = date.toLocaleDateString("en-GB", dateFormat);
     input.value = formattedDate;
@@ -374,6 +389,15 @@ calendar.addEventListener("click", function (event) {
     yearSelected = event.target.getAttribute("data-date").split("-")[0];
 
     //set the month and year selected
+    dateContainer.textContent = "";
+
+    const hebrewDayOfWeek = daysShort[date.getDay()];
+    const longDateText = `יום ${hebrewDayOfWeek}, ${date.getDate()} ב${
+      monthsShort[Number(monthSelected) - 1]
+    }`;
+    dateContainer.textContent = longDateText;
+
+    header.appendChild(dateContainer);
   }
 });
 
@@ -398,4 +422,16 @@ nextButton.addEventListener("click", (evt) => {
 previousButton.addEventListener("click", (evt) => {
   //evt.stopPropagation();
   arrowButtonHandler("prev", "month");
+});
+
+// ok button
+okButton.addEventListener("click", (evt) => {
+  evt.stopPropagation();
+  datepicker.classList.remove("open");
+});
+
+// cancel button
+cancelButton.addEventListener("click", (evt) => {
+  evt.stopPropagation();
+  datepicker.classList.remove("open");
 });

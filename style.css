@@ -27,7 +27,7 @@
 }
 
 .datepicker-container {
-  max-width: 400px;
+  max-width: 341px;
   box-sizing: border-box;
   border-radius: 10px;
   width: 100%;
@@ -46,13 +46,15 @@
   min-height: 75px;
   border-radius: 10px 10px 0 0;
   /* flex-direction: row-reverse; */
+  flex-direction: column;
+  color: white;
   align-items: flex-start;
 }
 
 .datepicker-header button {
   border: none;
   background: none;
-  font-size: 1.4rem;
+  font-size: 1.15rem;
   font-weight: bold;
   color: #fff;
   cursor: pointer;
@@ -67,12 +69,12 @@
 .datepicker-body {
   display: flex;
   flex-direction: column;
-  padding: 1rem;
+  padding: 1rem 1rem 0;
   background-color: #fff;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid #ebebeb;
   min-height: 320px;
-  max-height: 320px;
-  overflow: scroll;
+  max-height: 349px;
+  overflow-y: scroll;
 }
 
 /* Datepicker calendar */
@@ -89,8 +91,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   cursor: pointer;
   transition: background-color 0.2s ease-in-out;
@@ -120,23 +122,6 @@
   padding: 1rem;
   background-color: #fff;
   border-radius: 0 0 10px 10px;
-}
-
-.datepicker-footer button {
-  margin-left: 1rem;
-  padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
-  border: none;
-  background-color: #007bff;
-  color: #fff;
-  font-size: 1rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.datepicker-footer button:hover {
-  background-color: #0062cc;
 }
 
 .active {
@@ -181,6 +166,7 @@
   align-items: center;
   justify-content: center;
   text-align: center;
+  margin-top: 15px;
 }
 
 .year-body {
@@ -229,4 +215,31 @@
   grid-template-columns: repeat(7, 1fr);
   padding: 15px 0;
   text-align: center;
+}
+
+.datepicker-day-name {
+  color: rgba(0, 0, 0, 0.5);
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.datepicker-date-container {
+  font-size: 2rem;
+  font-weight: 500;
+}
+
+.datepicker-footer__button {
+  margin-left: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  border: none;
+  background-color: transparent;
+  color: #007bff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.datepicker-footer__button:hover {
+  background-color: #e0e0e0;
 }
