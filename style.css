@@ -1,6 +1,6 @@
 /* Datepicker*/
 
-* {
+.datepicker * {
   direction: rtl;
   font-family: "Heebo";
 }
@@ -251,4 +251,8 @@
 
 .datepicker-year:hover {
   color: #dddddd;
+}
+
+.datepicker-header-text {
+  cursor: pointer;
 }
