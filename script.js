@@ -287,6 +287,11 @@ function arrowButtonHandler(direction, type) {
   yearSelected = Number(yearSelected);
   if (type === "month") {
     if (direction === "next") {
+      if (
+        Number(yearToday) === yearSelected &&
+        monthSelected === Number(monthToday)
+      )
+        return;
       if (monthSelected < 11) {
         monthSelected++;
       } else {
@@ -304,6 +309,7 @@ function arrowButtonHandler(direction, type) {
     changeCalendarMonth();
   } else if (type === "year") {
     if (direction === "next") {
+      if (Number(yearToday) === yearSelected) return;
       yearSelected++;
       //generateYearView();
     } else if (direction === "prev") {
@@ -450,3 +456,15 @@ yearButton.addEventListener("click", (evt) => {
   body.innerHTML = "";
   generateYearView();
 });
+
+//convert all of the above to a class called DatePicker
+
+class Datepicker {
+  constructor(input, options) {
+    this.input = document.querySelector(inputSelector);
+    this.maxDate = options.maxDate;
+    this.minDate = options.minDate;
+    this.datepicker = document.createElement("div");
+    this.datepicker.classList.add("datepicker");
+  }
+}
