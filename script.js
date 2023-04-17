@@ -276,13 +276,6 @@ function changeCalendarMonth(evt) {
   body.appendChild(calendar);
 }
 
-function removeActiveStateFromMonths() {
-  const months = document.querySelectorAll(".month-gridview");
-  months.forEach((month) => {
-    month.classList.remove("active-month");
-  });
-}
-
 function arrowButtonHandler(direction, type) {
   yearSelected = Number(yearSelected);
   if (type === "month") {
@@ -456,15 +449,3 @@ yearButton.addEventListener("click", (evt) => {
   body.innerHTML = "";
   generateYearView();
 });
-
-//convert all of the above to a class called DatePicker
-
-class Datepicker {
-  constructor(input, options) {
-    this.input = document.querySelector(inputSelector);
-    this.maxDate = options.maxDate;
-    this.minDate = options.minDate;
-    this.datepicker = document.createElement("div");
-    this.datepicker.classList.add("datepicker");
-  }
-}

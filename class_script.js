@@ -12,7 +12,6 @@ class Datepicker {
     this.minDate = options.minDate || this.getDefaultMinDate();
     this.datepicker = document.createElement("div");
     this.datepicker.classList.add("datepicker");
-    console.log(this.datepicker);
     this.dateSelected = this.today;
     this.monthToday = new Date().getMonth();
     this.yearToday = new Date().getFullYear();
@@ -23,8 +22,8 @@ class Datepicker {
     this.datepickerContainer.classList.add("datepicker-container");
     this.header = document.createElement("div");
     this.header.classList.add("datepicker-header");
-    this.headerDateContainer = document.createElement("div");
-    this.headerDateContainer.classList.add("datepicker-date-text");
+    this.headerDateSelected = document.createElement("div");
+    this.headerDateSelected.classList.add("datepicker-date-text");
     this.body = document.createElement("div");
     this.body.classList.add("datepicker-body");
     this.calendar = document.createElement("div");
@@ -69,7 +68,7 @@ class Datepicker {
     this.datepicker.appendChild(this.datepickerContainer);
     this.datepickerContainer.appendChild(this.header);
     this.header.appendChild(this.yearButton);
-    this.header.appendChild(this.headerDateContainer);
+    this.header.appendChild(this.headerDateSelected);
     this.datepickerContainer.appendChild(this.body);
     this.body.appendChild(this.calendar);
     this.body.prepend(this.bodyHeader);
@@ -121,6 +120,7 @@ class Datepicker {
   }
 
   renderDaysOfWeek() {
+    this.days.innerHTML = "";
     for (let i = 0; i < daysShort.length; i++) {
       const day = document.createElement("div");
       day.classList.add("datepicker-day");
@@ -129,13 +129,10 @@ class Datepicker {
     }
   }
 
-  renderCalendar() {
-    const daysInMonth = new Date(
-      this.yearToday,
-      this.monthToday + 1,
-      0
-    ).getDate();
-    const firstDay = new Date(this.yearToday, this.monthToday, 1).getDay();
+  renderCalendar(month = this.monthToday, year = this.yearToday) {
+    const daysInMonth = new Date(year, month, 0).getDate();
+
+    const firstDay = new Date(year, month, 1).getDay();
 
     this.calendar.innerHTML = "";
 
@@ -155,22 +152,22 @@ class Datepicker {
       day.classList.add("datepicker-day");
       day.setAttribute(
         "data-date",
-        `${this.yearToday}-${this.monthToday + 1}-${i}`
+        `${this.yearSelected}-${this.monthSelected + 1}-${i}`
       );
       day.textContent = i;
       this.calendar.appendChild(day);
+      this.setActiveStates(day, this.dateSelected);
     }
-
-    //set active date
-    this.setActiveDate();
   }
 
-  setActiveDate() {
-    const activeDate = document.querySelector(
-      `[data-date="${this.dateSelected}"]`
-    );
-    if (activeDate) {
-      activeDate.classList += " today active";
+  setActiveStates(element, dateSelected) {
+    const elementDate = element.getAttribute("data-date");
+    if (elementDate == dateSelected && elementDate == this.today) {
+      element.classList += " today active";
+    } else if (elementDate == dateSelected) {
+      element.classList += " active";
+    } else if (elementDate == this.today) {
+      element.classList += " today";
     }
   }
 
@@ -184,14 +181,17 @@ class Datepicker {
   }
 
   renderNavigation(view) {
+    // this.bodyHeader.innerHTML = "";
     if (view == "month") {
       this.headerDateContainer.textContent = this.yearSelected;
-      this.body.appendChild(this.bodyHeader);
+      // this.body.appendChild(this.bodyHeader);
     } else if (view == "day") {
       this.headerDateContainer.textContent =
-        this.yearSelected + " " + months[this.monthSelected];
-      this.body.appendChild(this.bodyHeader);
+        months[this.monthSelected] + " " + this.yearSelected;
+      // this.body.appendChild(this.bodyHeader);
     }
+
+    this.body.prepend(this.bodyHeader);
   }
 
   renderMonthView(e) {
@@ -213,6 +213,59 @@ class Datepicker {
     this.setActiveMonth();
   }
 
+  resetActiveDays() {
+    const days = document.querySelectorAll(".datepicker-day");
+    days.forEach((day) => {
+      day.classList.remove("active");
+      this.setActiveStates(day, this.dateSelected);
+    });
+  }
+
+  selectDay(e) {
+    e.stopPropagation();
+    const elementDate = e.target.getAttribute("data-date");
+    if (elementDate) {
+      const date = new Date(elementDate);
+      const formattedDate = date.toLocaleDateString("en-GB", this.dateFormat);
+
+      this.input.value = formattedDate;
+      this.dateSelected = elementDate;
+
+      this.setActiveStates(e.target, this.dateSelected);
+
+      this.monthSelected = elementDate.split("-")[1];
+      this.yearSelected = elementDate.split("-")[0];
+
+      const hebrewDayOfWeek = daysShort[date.getDay()];
+      const longDateText = `יום ${hebrewDayOfWeek}, ${date.getDate()} ב${
+        monthsShort[Number(this.monthSelected) - 1]
+      }`;
+      this.headerDateSelected.textContent = longDateText;
+
+      this.resetActiveDays();
+    }
+  }
+
+  navigateNextDays() {
+    this.monthSelected++;
+    if (this.monthSelected > 11) {
+      this.monthSelected = 0;
+      this.yearSelected++;
+    }
+    this.renderNavigation("day");
+    this.renderCalendar(this.monthSelected, this.yearSelected);
+  }
+
+  navigatePrevDays() {
+    this.monthSelected--;
+    if (this.monthSelected < 0) {
+      this.monthSelected = 11;
+      this.yearSelected--;
+    }
+    this.renderNavigation("day");
+    this.renderCalendar(this.monthSelected, this.yearSelected);
+  }
+
   //add event listeners to input and datepicker
   addEventListeners() {
     this.input.addEventListener("click", () => this.open());
@@ -222,12 +275,21 @@ class Datepicker {
     this.headerDateContainer.addEventListener("click", (e) =>
       this.renderMonthView(e)
     );
+
+    //add event listeners to calendar
+    this.calendar.addEventListener("click", (e) => this.selectDay(e));
+
+    //navigate between calenar months
+    this.nextButton.addEventListener("click", () => this.navigateNextDays());
+    this.previousButton.addEventListener("click", () =>
+      this.navigatePrevDays()
+    );
   }
 }
 
 const datepicker = new Datepicker("#datepicker-input", {
   maxDate: "2033-12-31",
   minDate: "2010-01-01",
-  okButtonText: "Select",
-  cancelButtonText: "Cancel",
+  okButtonText: "בחר",
+  cancelButtonText: "בטל",
 });

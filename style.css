@@ -227,7 +227,7 @@
   width: 100%;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  padding: 15px 0;
+  padding: 11px 0;
   text-align: center;
 }
 
