@@ -5,6 +5,9 @@ let dateSelected = `${new Date().getFullYear()}-${
 }-${new Date().getDate()}`;
 let monthToday = `${new Date().getMonth()}`;
 let yearToday = `${new Date().getFullYear()}`;
+let currentDate = `${new Date().getFullYear()}-${
+  new Date().getMonth() + 1
+}-${new Date().getDate()}`;
 
 //initialize to today
 let monthSelected = monthToday;
@@ -93,7 +96,6 @@ footer.appendChild(cancelButton);
 //function to setActiveDate
 function setActiveDate(event) {
   //add active class to selected date
-  //   const active = document.getElementsByClassName("active");
   const active = document.querySelector(".active");
   if (active) {
     active.className = active.className.replace(" active", "");
@@ -129,9 +131,22 @@ function setCalendar() {
 
 setCalendar();
 
+function setActiveStates(element, dateSelected) {
+  //add today class to today's date
+  const elementDate = element.getAttribute("data-date");
+
+  if (elementDate === dateSelected && elementDate === currentDate) {
+    element.className += " today active";
+  } else if (elementDate === dateSelected) {
+    element.className += " active";
+  } else if (elementDate === currentDate) {
+    element.className += " today";
+  }
+}
+
 //add active class to date that corresponds to the dateSelected
 const activeDate = document.querySelector(`[data-date="${dateSelected}"]`);
-activeDate.className += " active";
+activeDate.className += " today active";
 
 //build monthView
 const monthView = document.createElement("div");
@@ -255,6 +270,7 @@ function changeCalendarMonth(evt) {
     day.setAttribute("data-date", `${year}-${Number(month) + 1}-${i}`);
     day.innerHTML = i;
     calendar.appendChild(day);
+    setActiveStates(day, dateSelected);
   }
 
   body.appendChild(calendar);
@@ -349,22 +365,24 @@ monthViewGrid.addEventListener("click", (evt) => {
 // Set the input field value when a date is selected
 calendar.addEventListener("click", function (event) {
   event.stopPropagation();
+
+  const elementDate = event.target.getAttribute("data-date");
   if (event.target.classList.contains("datepicker-day")) {
     //first remove dateContainer
     //header.removeChild(dateContainer);
 
-    const date = new Date(event.target.getAttribute("data-date"));
+    const date = new Date(elementDate);
     const formattedDate = date.toLocaleDateString("en-GB", dateFormat);
     input.value = formattedDate;
-    dateSelected = formattedDate;
+    dateSelected = elementDate;
 
     //close the calendar
     //datepicker.classList.remove("open");
 
     setActiveDate(event);
 
-    monthSelected = event.target.getAttribute("data-date").split("-")[1];
-    yearSelected = event.target.getAttribute("data-date").split("-")[0];
+    monthSelected = elementDate.split("-")[1];
+    yearSelected = elementDate.split("-")[0];
 
     //set the month and year selected
     dateContainer.textContent = "";

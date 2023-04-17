@@ -263,3 +263,7 @@
 .datepicker-header-text {
   cursor: pointer;
 }
+
+.today {
+  border: 1px solid;
+}
