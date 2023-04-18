@@ -12,6 +12,8 @@ class Datepicker {
     this.minDate = options.minDate || this.getDefaultMinDate();
     this.maxYear = this.maxDate.split("-")[0];
     this.minYear = this.minDate.split("-")[0];
+    this.minMonth = this.minDate.split("-")[1];
+    this.maxMonth = this.maxDate.split("-")[1];
     this.datepicker = document.createElement("div");
     this.datepicker.classList.add("datepicker");
     this.dateSelected = this.today;
@@ -221,10 +223,16 @@ class Datepicker {
     this.setActiveMonth();
   }
 
+  updateYearButton() {
+    this.yearButton.textContent = this.yearSelected;
+  }
+
   setActiveYear(e) {
     //this.monthSelected = "";
     this.yearSelected = e.target.getAttribute("data-year");
-    this.yearButton.textContent = this.yearSelected;
+
+    this.updateYearButton();
+
     if (e.target.classList.contains("year-option")) {
       const years = [...document.querySelectorAll(".year-option")];
       years.forEach((year) => {
@@ -310,15 +318,26 @@ class Datepicker {
     if (this.isMonthViewRendered()) {
       if (this.yearSelected <= this.maxYear) {
         this.yearSelected++;
+        this.updateYearButton();
         this.renderMonthView(e);
       } else {
         return;
       }
     } else {
+      //check if maxDate is reached
+      if (
+        this.yearSelected == this.maxYear &&
+        this.monthSelected == Number(this.maxMonth) - 1
+      ) {
+        console.log("reach maximum date");
+        return;
+      }
       this.monthSelected++;
+      this.updateYearButton();
       if (this.monthSelected > 11) {
         this.monthSelected = 0;
         this.yearSelected++;
+        this.updateYearButton();
       }
       this.renderNavigation("day");
       this.renderCalendar(Number(this.monthSelected), this.yearSelected);
@@ -330,15 +349,26 @@ class Datepicker {
     if (this.isMonthViewRendered()) {
       if (this.yearSelected > this.minYear) {
         this.yearSelected--;
+        this.updateYearButton();
         this.renderMonthView(e);
       } else {
         return;
       }
     } else {
+      //check if minDate is reached
+      if (
+        this.yearSelected == this.minYear &&
+        this.monthSelected == Number(this.minMonth) - 1
+      ) {
+        console.log("reach minimum date");
+        return;
+      }
+
       this.monthSelected--;
       if (this.monthSelected < 0) {
         this.monthSelected = 11;
         this.yearSelected--;
+        this.updateYearButton();
       }
       this.renderNavigation("day");
       this.renderCalendar(Number(this.monthSelected), this.yearSelected);
@@ -349,8 +379,6 @@ class Datepicker {
     const dateSelectedYear = this.dateSelected.split("-")[0];
     const dateSelectedMonth = this.dateSelected.split("-")[1];
 
-    console.log("dateSelectedMonth", dateSelectedMonth);
-    console.log();
     const gridArr = [...document.querySelectorAll(".month-gridview")];
     gridArr.forEach((element) => {
       element.classList.remove("active-month");
@@ -399,11 +427,13 @@ class Datepicker {
     );
     this.monthViewGrid.addEventListener("click", (e) => this.selectMonth(e));
     this.yearBody.addEventListener("click", (e) => this.setActiveYear(e));
+    this.okButton.addEventListener("click", () => this.close());
+    this.cancelButton.addEventListener("click", () => this.close());
   }
 }
 
 const datepicker = new Datepicker("#datepicker-input", {
-  maxDate: "2033-12-31",
+  maxDate: "2033-11-31",
   minDate: "2010-01-01",
   okButtonText: "בחר",
   cancelButtonText: "בטל",
