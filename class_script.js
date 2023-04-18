@@ -185,15 +185,6 @@ class Datepicker {
     }
   }
 
-  // setActiveMonth() {
-  //   const activeMonth = document.querySelector(
-  //     `[data-month="${this.monthSelected}"]`
-  //   );
-  //   if (activeMonth) {
-  //     activeMonth.classList += " active-month";
-  //   }
-  // }
-
   renderNavigation(view) {
     // this.bodyHeader.innerHTML = "";
     if (view == "month") {
