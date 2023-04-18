@@ -201,6 +201,36 @@ class Datepicker {
     this.body.prepend(this.bodyHeader);
   }
 
+  checkIfMonthDisabled(month) {
+    //if current year selected is max year, disable months after max month
+    // if (
+    //   this.yearSelected == this.maxYear ||
+    //   this.yearSelected == this.minYear
+    // ) {
+    //   if (
+    //     month + 1 >= this.maxMonth ||
+    //     month + 1 <= Number(this.minMonth) - 1
+    //   ) {
+    //     console.log("month  " + (month + 1));
+    //     console.log("this.maxMonth  " + this.maxMonth);
+    //     console.log("this.minMonth  " + this.minMonth);
+    //     return true;
+    //   }
+    //   return false;
+    // }
+    // return false;
+    if (this.yearSelected == this.maxYear) {
+      if (month + 1 > this.maxMonth) {
+        return true;
+      } else return false;
+    } else if (this.yearSelected == this.minYear) {
+      if (month + 1 <= Number(this.minMonth - 1)) {
+        return true;
+      }
+      return false;
+    }
+  }
+
   renderMonthView(e) {
     e.stopPropagation();
     this.body.innerHTML = "";
@@ -212,6 +242,9 @@ class Datepicker {
     for (let i = 0; i < monthsShort.length; i++) {
       const month = document.createElement("div");
       month.classList.add("month-gridview");
+      if (this.checkIfMonthDisabled(i)) {
+        month.classList.add("disabled");
+      }
       month.setAttribute("data-month", i);
       month.textContent = monthsShort[i];
       this.monthViewGrid.appendChild(month);
@@ -252,7 +285,7 @@ class Datepicker {
     this.body.innerHTML = "";
     this.yearBody.innerHTML = "";
 
-    for (let i = Number(this.minYear); i < Number(this.maxYear); i++) {
+    for (let i = Number(this.minYear); i <= Number(this.maxYear); i++) {
       const year = document.createElement("div");
       year.classList.add("year-option");
       year.setAttribute("data-year", i);
@@ -429,12 +462,13 @@ class Datepicker {
     this.yearBody.addEventListener("click", (e) => this.setActiveYear(e));
     this.okButton.addEventListener("click", () => this.close());
     this.cancelButton.addEventListener("click", () => this.close());
+    this.yearButton.addEventListener("click", (e) => this.renderYearView(e));
   }
 }
 
 const datepicker = new Datepicker("#datepicker-input", {
   maxDate: "2033-11-31",
-  minDate: "2010-01-01",
+  minDate: "2010-02-05",
   okButtonText: "בחר",
   cancelButtonText: "בטל",
 });

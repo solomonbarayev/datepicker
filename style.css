@@ -268,5 +268,9 @@
 }
 
 .today {
-  border: 1px solid rgba(0, 0, 0, 0.35);
+  border: 1px solid #007bff;
+}
+
+.disabled {
+  opacity: 0.5;
 }
