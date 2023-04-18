@@ -10,6 +10,8 @@ class Datepicker {
     }-${new Date().getDate()}`;
     this.maxDate = options.maxDate || this.getDefaultMaxDate();
     this.minDate = options.minDate || this.getDefaultMinDate();
+    this.maxYear = this.maxDate.split("-")[0];
+    this.minYear = this.minDate.split("-")[0];
     this.datepicker = document.createElement("div");
     this.datepicker.classList.add("datepicker");
     this.dateSelected = this.today;
@@ -62,7 +64,11 @@ class Datepicker {
     this.monthView.classList.add("month-view");
     this.monthViewGrid = document.createElement("div");
     this.monthViewGrid.classList.add("month-view-grid");
-
+    //year elements
+    this.yearView = document.createElement("div");
+    this.yearView.classList.add("year-view");
+    this.yearBody = document.createElement("div");
+    this.yearBody.classList.add("year-body");
     //add elements to the DOM
     document.body.appendChild(this.datepicker);
     this.datepicker.appendChild(this.datepickerContainer);
@@ -130,6 +136,10 @@ class Datepicker {
   }
 
   renderCalendar(month = this.monthToday, year = this.yearToday) {
+    this.body.innerHTML = "";
+    this.renderNavigation("day");
+    this.body.appendChild(this.days);
+
     const daysInMonth = new Date(year, month, 0).getDate();
 
     const firstDay = new Date(year, month, 1).getDay();
@@ -152,11 +162,15 @@ class Datepicker {
       day.classList.add("datepicker-day");
       day.setAttribute(
         "data-date",
-        `${this.yearSelected}-${this.monthSelected + 1}-${i}`
+        `${this.yearSelected}-${Number(this.monthSelected) + 1}-${i}`
       );
       day.textContent = i;
       this.calendar.appendChild(day);
       this.setActiveStates(day, this.dateSelected);
+
+      this.body.append(this.calendar);
+
+      this.headerDateContainer.classList.remove("month-render");
     }
   }
 
@@ -171,14 +185,14 @@ class Datepicker {
     }
   }
 
-  setActiveMonth() {
-    const activeMonth = document.querySelector(
-      `[data-month="${this.monthSelected}"]`
-    );
-    if (activeMonth) {
-      activeMonth.classList += " active-month";
-    }
-  }
+  // setActiveMonth() {
+  //   const activeMonth = document.querySelector(
+  //     `[data-month="${this.monthSelected}"]`
+  //   );
+  //   if (activeMonth) {
+  //     activeMonth.classList += " active-month";
+  //   }
+  // }
 
   renderNavigation(view) {
     // this.bodyHeader.innerHTML = "";
@@ -197,6 +211,7 @@ class Datepicker {
   renderMonthView(e) {
     e.stopPropagation();
     this.body.innerHTML = "";
+
     this.monthViewGrid.innerHTML = "";
 
     this.renderNavigation("month");
@@ -210,7 +225,53 @@ class Datepicker {
     }
     this.body.appendChild(this.monthViewGrid);
 
+    this.headerDateContainer.classList += " month-render";
+
     this.setActiveMonth();
+  }
+
+  setActiveYear(e) {
+    //this.monthSelected = "";
+    this.yearSelected = e.target.getAttribute("data-year");
+    this.yearButton.textContent = this.yearSelected;
+    if (e.target.classList.contains("year-option")) {
+      const years = [...document.querySelectorAll(".year-option")];
+      years.forEach((year) => {
+        year.classList.remove("active-year");
+        const yearTarget = year.getAttribute("data-year");
+        if (yearTarget == this.yearSelected) {
+          year.classList.add("active-year");
+        }
+      });
+    }
+
+    this.renderMonthView(e);
+  }
+
+  renderYearView(e) {
+    e.stopPropagation();
+    this.body.innerHTML = "";
+    this.yearBody.innerHTML = "";
+
+    for (let i = Number(this.minYear); i < Number(this.maxYear); i++) {
+      const year = document.createElement("div");
+      year.classList.add("year-option");
+      year.setAttribute("data-year", i);
+      year.textContent = i;
+      this.yearBody.appendChild(year);
+
+      if (i == Number(this.yearSelected)) {
+        year.classList.add("active-year");
+      }
+    }
+
+    this.body.appendChild(this.yearBody);
+
+    this.yearBody.querySelector(".active-year").scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+      inline: "center",
+    });
   }
 
   resetActiveDays() {
@@ -233,12 +294,13 @@ class Datepicker {
 
       this.setActiveStates(e.target, this.dateSelected);
 
-      this.monthSelected = elementDate.split("-")[1];
+      this.monthSelected = Number(elementDate.split("-")[1]) - 1;
+
       this.yearSelected = elementDate.split("-")[0];
 
       const hebrewDayOfWeek = daysShort[date.getDay()];
       const longDateText = `יום ${hebrewDayOfWeek}, ${date.getDate()} ב${
-        monthsShort[Number(this.monthSelected) - 1]
+        monthsShort[Number(this.monthSelected)]
       }`;
       this.headerDateSelected.textContent = longDateText;
 
@@ -246,24 +308,80 @@ class Datepicker {
     }
   }
 
-  navigateNextDays() {
-    this.monthSelected++;
-    if (this.monthSelected > 11) {
-      this.monthSelected = 0;
-      this.yearSelected++;
-    }
-    this.renderNavigation("day");
-    this.renderCalendar(this.monthSelected, this.yearSelected);
+  isMonthViewRendered() {
+    if (this.headerDateContainer.classList.contains("month-render"))
+      return true;
+    return false;
   }
 
-  navigatePrevDays() {
-    this.monthSelected--;
-    if (this.monthSelected < 0) {
-      this.monthSelected = 11;
-      this.yearSelected--;
+  navigateNext(e) {
+    //first check what kind of navigation we are in
+    if (this.isMonthViewRendered()) {
+      if (this.yearSelected <= this.maxYear) {
+        this.yearSelected++;
+        this.renderMonthView(e);
+      } else {
+        return;
+      }
+    } else {
+      this.monthSelected++;
+      if (this.monthSelected > 11) {
+        this.monthSelected = 0;
+        this.yearSelected++;
+      }
+      this.renderNavigation("day");
+      this.renderCalendar(Number(this.monthSelected), this.yearSelected);
     }
-    this.renderNavigation("day");
-    this.renderCalendar(this.monthSelected, this.yearSelected);
+  }
+
+  navigatePrevious(e) {
+    //first check what kind of navigation we are in
+    if (this.isMonthViewRendered()) {
+      if (this.yearSelected > this.minYear) {
+        this.yearSelected--;
+        this.renderMonthView(e);
+      } else {
+        return;
+      }
+    } else {
+      this.monthSelected--;
+      if (this.monthSelected < 0) {
+        this.monthSelected = 11;
+        this.yearSelected--;
+      }
+      this.renderNavigation("day");
+      this.renderCalendar(Number(this.monthSelected), this.yearSelected);
+    }
+  }
+
+  setActiveMonth() {
+    const dateSelectedYear = this.dateSelected.split("-")[0];
+    const dateSelectedMonth = this.dateSelected.split("-")[1];
+
+    console.log("dateSelectedMonth", dateSelectedMonth);
+    console.log();
+    const gridArr = [...document.querySelectorAll(".month-gridview")];
+    gridArr.forEach((element) => {
+      element.classList.remove("active-month");
+      if (
+        this.monthSelected == element.getAttribute("data-month") &&
+        dateSelectedYear == this.yearSelected
+      ) {
+        element.classList.add("active-month");
+      }
+    });
+  }
+
+  selectMonth(e) {
+    e.stopPropagation();
+    if (e.target.getAttribute("data-month")) {
+      this.monthSelected = e.target.getAttribute("data-month");
+
+      this.setActiveMonth();
+      //render calendar with new month
+      this.body.innerHTML = "";
+      this.renderCalendar(this.monthSelected, this.yearSelected);
+    }
   }
 
   //add event listeners to input and datepicker
@@ -272,18 +390,24 @@ class Datepicker {
     this.datepicker.addEventListener("click", (e) =>
       this.closeOnOverlayClick(e)
     );
-    this.headerDateContainer.addEventListener("click", (e) =>
-      this.renderMonthView(e)
-    );
+    this.headerDateContainer.addEventListener("click", (e) => {
+      if (this.headerDateContainer.classList.contains("month-render")) {
+        this.renderYearView(e);
+      } else {
+        this.renderMonthView(e);
+      }
+    });
 
     //add event listeners to calendar
     this.calendar.addEventListener("click", (e) => this.selectDay(e));
 
     //navigate between calenar months
-    this.nextButton.addEventListener("click", () => this.navigateNextDays());
-    this.previousButton.addEventListener("click", () =>
-      this.navigatePrevDays()
+    this.nextButton.addEventListener("click", (e) => this.navigateNext(e));
+    this.previousButton.addEventListener("click", (e) =>
+      this.navigatePrevious(e)
     );
+    this.monthViewGrid.addEventListener("click", (e) => this.selectMonth(e));
+    this.yearBody.addEventListener("click", (e) => this.setActiveYear(e));
   }
 }
 

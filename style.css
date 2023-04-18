@@ -47,8 +47,8 @@
   justify-content: space-between;
   padding: 0.6rem;
   background-color: #1976d2;
-  font-size: 1.5rem;
-  font-weight: bold;
+  font-size: 1.9rem;
+  font-weight: 500;
   min-height: 75px;
   border-radius: 6px 6px 0 0;
   /* flex-direction: row-reverse; */
@@ -74,8 +74,8 @@
   padding: 0.7rem 1rem 0;
   background-color: #fff;
   /* border-bottom: 1px solid #ebebeb; */
-  min-height: 262px;
-  max-height: 262px;
+  min-height: 267px;
+  max-height: 267px;
   overflow-y: scroll;
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
@@ -209,6 +209,7 @@
 
 .month-gridview {
   cursor: pointer;
+  font-size: 0.9rem;
 }
 
 .active-month {
@@ -229,6 +230,7 @@
   grid-template-columns: repeat(7, 1fr);
   padding: 11px 0;
   text-align: center;
+  justify-items: center;
 }
 
 .datepicker-day-name {
@@ -266,5 +268,5 @@
 }
 
 .today {
-  border: 1px solid;
+  border: 1px solid rgba(0, 0, 0, 0.35);
 }
