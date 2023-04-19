@@ -1,451 +1,506 @@
 import { months, monthsShort, daysShort } from "./constants.js";
 
-let dateSelected = `${new Date().getFullYear()}-${
-  new Date().getMonth() + 1
-}-${new Date().getDate()}`;
-let monthToday = `${new Date().getMonth()}`;
-let yearToday = `${new Date().getFullYear()}`;
-let currentDate = `${new Date().getFullYear()}-${
-  new Date().getMonth() + 1
-}-${new Date().getDate()}`;
+//convert all code from script.js to a class called Datepicker
+class Datepicker {
+  constructor(inputSelector, options) {
+    this.options = options || {};
+    this.input = document.querySelector(inputSelector);
+    this.today = `${new Date().getFullYear()}-${
+      new Date().getMonth() + 1
+    }-${new Date().getDate()}`;
+    this.maxDate = options.maxDate || this.getDefaultMaxDate();
+    this.minDate = options.minDate || this.getDefaultMinDate();
+    this.maxYear = this.maxDate.split("-")[0];
+    this.minYear = this.minDate.split("-")[0];
+    this.minMonth = this.minDate.split("-")[1];
+    this.maxMonth = this.maxDate.split("-")[1];
+    this.datepicker = document.createElement("div");
+    this.datepicker.classList.add("datepicker");
+    this.dateSelected = this.today;
+    this.monthToday = new Date().getMonth();
+    this.yearToday = new Date().getFullYear();
+    this.monthSelected = this.monthToday;
+    this.yearSelected = this.yearToday;
+    this.dateFormat = { year: "numeric", month: "numeric", day: "numeric" };
+    this.datepickerContainer = document.createElement("div");
+    this.datepickerContainer.classList.add("datepicker-container");
+    this.header = document.createElement("div");
+    this.header.classList.add("datepicker-header");
+    this.headerDateSelected = document.createElement("div");
+    this.headerDateSelected.classList.add("datepicker-date-text");
+    this.body = document.createElement("div");
+    this.body.classList.add("datepicker-body");
+    this.calendar = document.createElement("div");
+    this.calendar.classList.add("datepicker-calendar");
+    this.yearButton = document.createElement("button");
+    this.yearButton.classList.add("datepicker-year");
+    this.yearButton.textContent = this.yearSelected;
+    this.setAriaLabel(this.yearButton, this.yearSelected);
+    this.days = document.createElement("div");
+    this.days.classList.add("datepicker-days");
+    //build function to render days of week
+    this.body.appendChild(this.days);
+    this.bodyHeader = document.createElement("div");
+    this.bodyHeader.classList.add("datepicker-body-header");
+    this.previousButton = document.createElement("button");
+    this.previousButton.classList.add("datepicker-previous");
+    this.previousButton.textContent = "<";
+    this.setAriaLabel(this.previousButton, "navigate previous");
+    this.nextButton = document.createElement("button");
+    this.nextButton.classList.add("datepicker-next");
+    this.nextButton.textContent = ">";
+    this.setAriaLabel(this.nextButton, "navigate next");
+    this.headerDateContainer = document.createElement("button");
+    this.headerDateContainer.classList.add("datepicker-header-text");
+    this.headerDateContainer.textContent = `${
+      months[Number(this.monthSelected)]
+    } ${this.yearSelected}`;
+    this.footer = document.createElement("div");
+    this.footer.classList.add("datepicker-footer");
+    this.okButton = document.createElement("button");
+    this.okButton.classList.add("datepicker-footer__button");
+    this.okButton.textContent = this.options.okButtonText || "OK";
+    this.setAriaLabel(this.okButton, this.okButton.textContent);
+    this.cancelButton = document.createElement("button");
+    this.cancelButton.classList.add("datepicker-footer__button");
+    this.cancelButton.textContent = this.options.cancelButtonText || "Cancel";
+    this.setAriaLabel(this.cancelButton, this.cancelButton.textContent);
+    //month elements
+    this.monthView = document.createElement("div");
+    this.monthView.classList.add("month-view");
+    this.monthViewGrid = document.createElement("div");
+    this.monthViewGrid.classList.add("month-view-grid");
+    //year elements
+    this.yearView = document.createElement("div");
+    this.yearView.classList.add("year-view");
+    this.yearBody = document.createElement("div");
+    this.yearBody.classList.add("year-body");
+    //add elements to the DOM
+    document.body.appendChild(this.datepicker);
+    this.datepicker.appendChild(this.datepickerContainer);
+    this.datepickerContainer.appendChild(this.header);
+    this.header.appendChild(this.yearButton);
+    this.header.appendChild(this.headerDateSelected);
+    this.datepickerContainer.appendChild(this.body);
+    this.body.appendChild(this.calendar);
+    this.body.prepend(this.bodyHeader);
+    this.bodyHeader.appendChild(this.previousButton);
+    this.bodyHeader.appendChild(this.headerDateContainer);
+    this.bodyHeader.appendChild(this.nextButton);
+    this.footer.appendChild(this.okButton);
+    this.footer.appendChild(this.cancelButton);
+    this.datepickerContainer.appendChild(this.footer);
 
-//initialize to today
-let monthSelected = monthToday;
-let yearSelected = yearToday;
+    this.monthView.appendChild(this.monthViewGrid);
 
-// Get the input field and set the date format
-const input = document.getElementById("datepicker-input");
-const dateFormat = { year: "numeric", month: "numeric", day: "numeric" };
-
-// Create the datepicker modal
-const datepicker = document.createElement("div");
-datepicker.classList.add("datepicker");
-document.body.appendChild(datepicker);
-
-//create container that holds datepicker
-const datepickerContainer = document.createElement("div");
-datepickerContainer.classList.add("datepicker-container");
-datepicker.appendChild(datepickerContainer);
-
-// Create the datepicker header
-const header = document.createElement("div");
-header.classList.add("datepicker-header");
-datepickerContainer.appendChild(header);
-
-// create button that hold the year selected currently
-const yearButton = document.createElement("button");
-yearButton.classList.add("datepicker-year");
-yearButton.textContent = yearSelected;
-header.appendChild(yearButton);
-
-// Create the datepicker body
-const body = document.createElement("div");
-body.classList.add("datepicker-body");
-datepickerContainer.appendChild(body);
-
-setDaysOfWeek();
-
-// Create the datepicker calendar
-const calendar = document.createElement("div");
-calendar.classList.add("datepicker-calendar");
-body.appendChild(calendar);
-
-//create bodyHeader that contains a button previous, the current month select and year selected concatenated into a string, and a button next
-const bodyHeader = document.createElement("div");
-bodyHeader.classList.add("datepicker-body-header");
-body.prepend(bodyHeader);
-
-const previousButton = document.createElement("button");
-previousButton.classList.add("datepicker-previous");
-previousButton.textContent = "<";
-bodyHeader.appendChild(previousButton);
-
-//create container that holds the header date text
-const headerDateContainer = document.createElement("button");
-headerDateContainer.classList.add("datepicker-header-text");
-headerDateContainer.textContent = `${
-  months[Number(monthSelected)]
-} ${yearSelected}`;
-bodyHeader.appendChild(headerDateContainer);
-
-const nextButton = document.createElement("button");
-nextButton.classList.add("datepicker-next");
-nextButton.innerHTML = ">";
-bodyHeader.appendChild(nextButton);
-
-// Create the datepicker footer
-const footer = document.createElement("div");
-footer.classList.add("datepicker-footer");
-datepickerContainer.appendChild(footer);
-
-// Create the datepicker date container
-const dateContainer = document.createElement("div");
-dateContainer.classList.add("datepicker-date-container");
-
-//create two buttons in the footer on is "Ok" and the other is "Cancel"
-const okButton = document.createElement("button");
-okButton.classList.add("datepicker-footer__button");
-okButton.textContent = "בחר";
-footer.appendChild(okButton);
-
-const cancelButton = document.createElement("button");
-cancelButton.classList.add("datepicker-footer__button");
-cancelButton.textContent = "ביטול";
-footer.appendChild(cancelButton);
-
-//function to setActiveDate
-function setActiveDate(event) {
-  //add active class to selected date
-  const active = document.querySelector(".active");
-  if (active) {
-    active.className = active.className.replace(" active", "");
-  }
-  event.target.className += " active";
-}
-
-// Set the calendar to the current month and year
-function setCalendar() {
-  const date = new Date();
-  const year = date.getFullYear();
-  const month = date.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const firstDay = new Date(year, month, 1).getDay();
-
-  // Clear the calendar
-  calendar.innerHTML = "";
-
-  // Create the calendar days
-  for (let i = 0; i < firstDay; i++) {
-    const day = document.createElement("div");
-    day.classList.add("datepicker-day");
-    calendar.appendChild(day);
-  }
-  for (let i = 1; i <= daysInMonth; i++) {
-    const day = document.createElement("div");
-    day.classList.add("datepicker-day");
-    day.setAttribute("data-date", `${year}-${month + 1}-${i}`);
-    day.innerHTML = i;
-    calendar.appendChild(day);
-  }
-}
-
-setCalendar();
-
-function setActiveStates(element, dateSelected) {
-  //add today class to today's date
-  const elementDate = element.getAttribute("data-date");
-
-  if (elementDate === dateSelected && elementDate === currentDate) {
-    element.className += " today active";
-  } else if (elementDate === dateSelected) {
-    element.className += " active";
-  } else if (elementDate === currentDate) {
-    element.className += " today";
-  }
-}
-
-//add active class to date that corresponds to the dateSelected
-const activeDate = document.querySelector(`[data-date="${dateSelected}"]`);
-activeDate.className += " today active";
-
-//build monthView
-const monthView = document.createElement("div");
-monthView.classList.add("month-view");
-
-//build a 3x4 table grid for the month view
-const monthViewGrid = document.createElement("div");
-monthViewGrid.classList.add("month-view-grid");
-monthView.appendChild(monthViewGrid);
-
-//build yearView
-const yearView = document.createElement("div");
-yearView.classList.add("year-view");
-
-//build scrollable year options
-const yearBody = document.createElement("div");
-yearBody.classList.add("year-body");
-
-//check which year is selected and add active class to it
-const activeYear = document.querySelector(`[data-year="${yearSelected}"]`);
-if (activeYear) activeYear.className += " active-year";
-
-//add yearBody to yearView
-yearView.appendChild(yearBody);
-
-function setHeaderDateContainerToMonthView(text) {
-  !text
-    ? (headerDateContainer.textContent = yearSelected)
-    : (headerDateContainer.textContent = text);
-
-  body.prepend(bodyHeader);
-
-  headerDateContainer.addEventListener("click", (evt) => {
-    evt.stopPropagation();
-    generateYearView();
-  });
-}
-
-function generateYearView() {
-  body.innerHTML = "";
-  //generate years from 10 years ago the the current year
-  for (let i = Number(yearToday); i >= Number(yearToday) - 30; i--) {
-    const year = document.createElement("div");
-    year.classList.add("year-option");
-    year.setAttribute("data-year", i);
-    year.textContent = i;
-    yearBody.appendChild(year);
+    //render initial calendar
+    this.renderCalendar();
+    //add event listeners
+    this.addEventListeners();
   }
 
-  body.appendChild(yearBody);
-
-  if (body.querySelector(".active-year")) {
-    body.querySelector(".active-year").classList.remove("active-year");
-  }
-  //check which year is selected and add active class to it
-  const activeYear = document.querySelector(`[data-year="${yearSelected}"]`);
-  if (activeYear) activeYear.className += " active-year";
-}
-
-function generateGridWithMonths() {
-  //clear the monthViewGrid
-  monthViewGrid.innerHTML = "";
-
-  for (let i = 0; i < monthsShort.length; i++) {
-    const month = document.createElement("div");
-    month.classList.add("month-gridview");
-    month.setAttribute("data-month", i);
-    month.textContent = monthsShort[i];
-
-    monthViewGrid.appendChild(month);
+  open() {
+    this.datepicker.classList.add("open");
   }
 
-  body.appendChild(monthViewGrid);
-
-  //check which month is selected and add active class to it
-  const activeMonth = document.querySelector(
-    `[data-month="${Number(monthSelected)}"]`
-  );
-  if (activeMonth) activeMonth.className += " active-month";
-}
-
-function setDaysOfWeek() {
-  const days = document.createElement("div");
-  days.classList.add("datepicker-days");
-
-  daysShort.forEach((day) => {
-    const dayName = document.createElement("div");
-    dayName.classList.add("datepicker-day-name");
-    dayName.innerHTML = day;
-    days.appendChild(dayName);
-  });
-
-  body.appendChild(days);
-}
-
-function changeCalendarMonth(evt) {
-  const year = yearSelected;
-  const month = monthSelected;
-  const daysInMonth = new Date(Number(year), Number(month) + 1, 0).getDate();
-  const firstDay = new Date(year, month, 1).getDay();
-
-  // Clear the calendar
-  //monthViewGrid.style.cssText = "display: none";
-  body.innerHTML = "";
-  setHeaderDateContainerToMonthView(`${months[monthSelected]} ${yearSelected}`);
-
-  setDaysOfWeek();
-
-  calendar.innerHTML = "";
-
-  // Create the calendar days
-  for (let i = 0; i < firstDay; i++) {
-    const day = document.createElement("div");
-    day.classList.add("datepicker-day");
-    calendar.appendChild(day);
+  close() {
+    this.datepicker.classList.remove("open");
   }
 
-  for (let i = 1; i <= daysInMonth; i++) {
-    const day = document.createElement("div");
-    day.classList.add("datepicker-day");
-    day.setAttribute("data-date", `${year}-${Number(month) + 1}-${i}`);
-    day.innerHTML = i;
-    calendar.appendChild(day);
-    setActiveStates(day, dateSelected);
+  closeOnOverlayClick(e) {
+    if (!e.target.closest(".datepicker-container")) {
+      this.close();
+    }
   }
 
-  body.appendChild(calendar);
-}
+  getDefaultMaxDate() {
+    //defaults to 10 years from now in yyyy-mm-dd format
+    const today = new Date();
+    const year = today.getFullYear() + 10;
+    const month = today.getMonth() + 1;
+    const day = today.getDate();
+    return `${year}-${month}-${day}`;
+  }
 
-function arrowButtonHandler(direction, type) {
-  yearSelected = Number(yearSelected);
-  if (type === "month") {
-    if (direction === "next") {
-      if (
-        Number(yearToday) === yearSelected &&
-        monthSelected === Number(monthToday)
-      )
+  getDefaultMinDate() {
+    //defaults to 10 years ago
+    const today = new Date();
+    const year = today.getFullYear() - 10;
+    const month = today.getMonth() + 1;
+    const day = today.getDate();
+    return `${year}-${month}-${day}`;
+  }
+
+  renderDaysOfWeek() {
+    this.days.innerHTML = "";
+    for (let i = 0; i < daysShort.length; i++) {
+      const day = document.createElement("div");
+      day.classList.add("datepicker-day");
+      day.textContent = daysShort[i];
+      this.days.appendChild(day);
+    }
+  }
+
+  setAriaLabel(element, text) {
+    element.setAttribute("aria-label", text);
+  }
+
+  setAriaDisabled(element) {
+    element.setAttribute("aria-disabled", true);
+  }
+
+  renderCalendar(month = this.monthToday, year = this.yearToday) {
+    this.body.innerHTML = "";
+    this.renderNavigation("day");
+    this.body.appendChild(this.days);
+
+    const daysInMonth = new Date(year, month, 0).getDate();
+
+    const firstDay = new Date(year, month, 1).getDay();
+
+    this.calendar.innerHTML = "";
+
+    //render days of week
+    this.renderDaysOfWeek();
+
+    //render blank days
+    for (let i = 0; i < firstDay; i++) {
+      const day = document.createElement("div");
+      day.classList.add("datepicker-day");
+      this.calendar.appendChild(day);
+      this.setAriaLabel(day, "non date");
+    }
+
+    //render days in month
+    for (let i = 1; i <= daysInMonth; i++) {
+      const day = document.createElement("button");
+      day.classList.add("datepicker-day");
+      let currentDate = `${this.yearSelected}-${
+        Number(this.monthSelected) + 1
+      }-${i}`;
+      day.setAttribute("data-date", currentDate);
+      if (this.checkIfDayDisable(currentDate)) {
+        day.classList.add("disabled");
+        day.setAttribute("disabled", true);
+
+        this.setAriaDisabled(day);
+      }
+      day.textContent = i;
+      this.calendar.appendChild(day);
+      this.setActiveStates(day, this.dateSelected);
+
+      this.body.append(this.calendar);
+
+      this.headerDateContainer.classList.remove("month-render");
+
+      this.setAriaLabel(day, currentDate);
+    }
+  }
+
+  setActiveStates(element, dateSelected) {
+    const elementDate = element.getAttribute("data-date");
+    if (elementDate == dateSelected && elementDate == this.today) {
+      element.classList += " today active";
+    } else if (elementDate == dateSelected) {
+      element.classList += " active";
+    } else if (elementDate == this.today) {
+      element.classList += " today";
+    }
+  }
+
+  renderNavigation(view) {
+    // this.bodyHeader.innerHTML = "";
+    if (view == "month") {
+      this.headerDateContainer.textContent = this.yearSelected;
+      // this.body.appendChild(this.bodyHeader);
+    } else if (view == "day") {
+      this.headerDateContainer.textContent =
+        months[this.monthSelected] + " " + this.yearSelected;
+      // this.body.appendChild(this.bodyHeader);
+    }
+    this.setAriaLabel(
+      this.headerDateContainer,
+      this.headerDateContainer.textContent
+    );
+
+    this.body.prepend(this.bodyHeader);
+  }
+
+  checkIfMonthDisabled(month) {
+    if (this.yearSelected == this.maxYear) {
+      if (month + 1 > this.maxMonth) {
+        return true;
+      } else return false;
+    } else if (this.yearSelected == this.minYear) {
+      if (month + 1 <= Number(this.minMonth - 1)) {
+        return true;
+      }
+      return false;
+    }
+  }
+  checkIfDayDisable(date) {
+    const maxDate = new Date(this.maxDate).setDate(
+      new Date(this.maxDate).getDate()
+    );
+    //adding one day less to minDate
+    const minDate = new Date(this.minDate).setDate(
+      new Date(this.minDate).getDate() - 1
+    );
+
+    if (minDate > new Date(date)) {
+      return true;
+    } else if (maxDate < new Date(date)) {
+      return true;
+    }
+    return false;
+  }
+
+  renderMonthView(e) {
+    e.stopPropagation();
+    this.body.innerHTML = "";
+
+    this.monthViewGrid.innerHTML = "";
+
+    this.renderNavigation("month");
+
+    for (let i = 0; i < monthsShort.length; i++) {
+      const month = document.createElement("button");
+      month.classList.add("month-gridview");
+      if (this.checkIfMonthDisabled(i)) {
+        month.classList.add("disabled");
+        month.setAttribute("disabled", true);
+        this.setAriaDisabled(month);
+      }
+      month.setAttribute("data-month", i);
+      month.textContent = monthsShort[i];
+      this.monthViewGrid.appendChild(month);
+      this.setAriaLabel(month, `month = ${i}`);
+    }
+    this.body.appendChild(this.monthViewGrid);
+
+    this.headerDateContainer.classList += " month-render";
+
+    this.setActiveMonth();
+  }
+
+  updateYearButton() {
+    this.yearButton.textContent = this.yearSelected;
+    this.setAriaLabel(this.yearButton, this.yearSelected);
+  }
+
+  setActiveYear(e) {
+    //this.monthSelected = "";
+    this.yearSelected = e.target.getAttribute("data-year");
+
+    this.updateYearButton();
+
+    let notYearOption = !e.target.getAttribute("data-year");
+
+    if (!notYearOption) {
+      const years = [...document.querySelectorAll(".year-option")];
+      years.forEach((year) => {
+        year.classList.remove("active-year");
+        const yearTarget = year.getAttribute("data-year");
+        if (yearTarget == this.yearSelected) {
+          year.classList.add("active-year");
+        }
+      });
+    }
+
+    this.renderMonthView(e);
+  }
+
+  renderYearView(e) {
+    e.stopPropagation();
+    this.body.innerHTML = "";
+    this.yearBody.innerHTML = "";
+
+    for (let i = Number(this.minYear); i <= Number(this.maxYear); i++) {
+      const year = document.createElement("button");
+      year.classList.add("year-option");
+      year.setAttribute("data-year", i);
+      year.setAttribute("aria-label", i);
+      year.textContent = i;
+      this.yearBody.appendChild(year);
+
+      if (i == Number(this.yearSelected)) {
+        year.classList.add("active-year");
+      }
+
+      this.setAriaLabel(year, `year = ${i}`);
+    }
+
+    this.body.appendChild(this.yearBody);
+
+    this.yearBody.querySelector(".active-year").scrollIntoView({
+      block: "center",
+      inline: "center",
+    });
+  }
+
+  resetActiveDays() {
+    const days = document.querySelectorAll(".datepicker-day");
+    days.forEach((day) => {
+      day.classList.remove("active");
+      this.setActiveStates(day, this.dateSelected);
+    });
+  }
+
+  selectDay(e) {
+    e.stopPropagation();
+    const elementDate = e.target.getAttribute("data-date");
+    if (elementDate) {
+      const date = new Date(elementDate);
+      const formattedDate = date.toLocaleDateString("en-GB", this.dateFormat);
+
+      this.input.value = formattedDate;
+      this.dateSelected = elementDate;
+
+      this.setActiveStates(e.target, this.dateSelected);
+
+      this.monthSelected = Number(elementDate.split("-")[1]) - 1;
+
+      this.yearSelected = elementDate.split("-")[0];
+
+      const hebrewDayOfWeek = daysShort[date.getDay()];
+      const longDateText = `יום ${hebrewDayOfWeek}, ${date.getDate()} ב${
+        monthsShort[Number(this.monthSelected)]
+      }`;
+      this.headerDateSelected.textContent = longDateText;
+
+      this.resetActiveDays();
+    }
+  }
+
+  isMonthViewRendered() {
+    if (this.headerDateContainer.classList.contains("month-render"))
+      return true;
+    return false;
+  }
+
+  navigateNext(e) {
+    //first check what kind of navigation we are in
+    if (this.isMonthViewRendered()) {
+      if (this.yearSelected <= this.maxYear) {
+        this.yearSelected++;
+        this.updateYearButton();
+        this.renderMonthView(e);
+      } else {
         return;
-      if (monthSelected < 11) {
-        monthSelected++;
-      } else {
-        monthSelected = 0;
-        yearSelected++;
       }
-    } else if (direction === "prev") {
-      if (monthSelected > 0) {
-        monthSelected--;
-      } else {
-        monthSelected = 11;
-        yearSelected--;
+    } else {
+      //check if maxDate is reached
+      if (
+        this.yearSelected == this.maxYear &&
+        this.monthSelected == Number(this.maxMonth) - 1
+      ) {
+        console.log("reach maximum date");
+        return;
       }
+      this.monthSelected++;
+      this.updateYearButton();
+      if (this.monthSelected > 11) {
+        this.monthSelected = 0;
+        this.yearSelected++;
+        this.updateYearButton();
+      }
+      this.renderNavigation("day");
+      this.renderCalendar(Number(this.monthSelected), this.yearSelected);
     }
-    changeCalendarMonth();
-  } else if (type === "year") {
-    if (direction === "next") {
-      if (Number(yearToday) === yearSelected) return;
-      yearSelected++;
-      //generateYearView();
-    } else if (direction === "prev") {
-      yearSelected--;
-      //generateYearView();
+  }
+
+  navigatePrevious(e) {
+    //first check what kind of navigation we are in
+    if (this.isMonthViewRendered()) {
+      if (this.yearSelected > this.minYear) {
+        this.yearSelected--;
+        this.updateYearButton();
+        this.renderMonthView(e);
+      } else {
+        return;
+      }
+    } else {
+      //check if minDate is reached
+      if (
+        this.yearSelected == this.minYear &&
+        this.monthSelected == Number(this.minMonth) - 1
+      ) {
+        console.log("reach minimum date");
+        return;
+      }
+
+      this.monthSelected--;
+      if (this.monthSelected < 0) {
+        this.monthSelected = 11;
+        this.yearSelected--;
+        this.updateYearButton();
+      }
+      this.renderNavigation("day");
+      this.renderCalendar(Number(this.monthSelected), this.yearSelected);
     }
-    setHeaderDateContainerToMonthView();
-    //removeActiveStateFromMonths();
+  }
+
+  setActiveMonth() {
+    const dateSelectedYear = this.dateSelected.split("-")[0];
+    const dateSelectedMonth = this.dateSelected.split("-")[1];
+
+    const gridArr = [...document.querySelectorAll(".month-gridview")];
+    gridArr.forEach((element) => {
+      element.classList.remove("active-month");
+      if (
+        this.monthSelected == element.getAttribute("data-month") &&
+        dateSelectedYear == this.yearSelected
+      ) {
+        element.classList.add("active-month");
+      }
+    });
+  }
+
+  selectMonth(e) {
+    e.stopPropagation();
+    if (e.target.getAttribute("data-month")) {
+      this.monthSelected = e.target.getAttribute("data-month");
+
+      this.setActiveMonth();
+      //render calendar with new month
+      this.body.innerHTML = "";
+      this.renderCalendar(this.monthSelected, this.yearSelected);
+    }
+  }
+
+  //add event listeners to input and datepicker
+  addEventListeners() {
+    this.input.addEventListener("click", () => this.open());
+    this.datepicker.addEventListener("click", (e) =>
+      this.closeOnOverlayClick(e)
+    );
+    this.headerDateContainer.addEventListener("click", (e) => {
+      if (this.headerDateContainer.classList.contains("month-render")) {
+        this.renderYearView(e);
+      } else {
+        this.renderMonthView(e);
+      }
+    });
+
+    //add event listeners to calendar
+    this.calendar.addEventListener("click", (e) => this.selectDay(e));
+
+    //navigate between calenar months
+    this.nextButton.addEventListener("click", (e) => this.navigateNext(e));
+    this.previousButton.addEventListener("click", (e) =>
+      this.navigatePrevious(e)
+    );
+    this.monthViewGrid.addEventListener("click", (e) => this.selectMonth(e));
+    this.yearBody.addEventListener("click", (e) => this.setActiveYear(e));
+    this.okButton.addEventListener("click", () => this.close());
+    this.cancelButton.addEventListener("click", () => this.close());
+    this.yearButton.addEventListener("click", (e) => this.renderYearView(e));
   }
 }
 
-//Event listeners
-
-// Open the datepicker when the input field is clicked
-input.addEventListener("click", function () {
-  datepicker.classList.add("open");
-});
-
-yearBody.addEventListener("click", (evt) => {
-  evt.stopPropagation();
-  if (evt.target.classList.contains("year-option")) {
-    yearSelected = evt.target.getAttribute("data-year");
-    //remove active class from all years
-    const allYears = document.querySelectorAll(".year-option");
-    allYears.forEach((year) => {
-      year.classList.remove("active-year");
-    });
-    //add active class to the year that was clicked
-    evt.target.className += " active-year";
-
-    //change datepicker-year to the year that was clicked
-    yearButton.textContent = yearSelected;
-  }
-
-  //return to month view
-  body.innerHTML = "";
-  setHeaderDateContainerToMonthView();
-  generateGridWithMonths();
-});
-
-monthViewGrid.addEventListener("click", (evt) => {
-  evt.stopPropagation();
-  if (evt.target.classList.contains("month-gridview")) {
-    monthSelected = evt.target.getAttribute("data-month");
-    //remove active class from all months
-    const allMonths = document.querySelectorAll(".month-gridview");
-    allMonths.forEach((month) => {
-      month.classList.remove("active-month");
-    });
-    //add active class to the month that was clicked
-    evt.target.className += " active-month";
-
-    //return to date view
-    //body.innerHTML = "";
-    changeCalendarMonth();
-  }
-});
-
-// Set the input field value when a date is selected
-calendar.addEventListener("click", function (event) {
-  event.stopPropagation();
-
-  const elementDate = event.target.getAttribute("data-date");
-  if (event.target.classList.contains("datepicker-day")) {
-    //first remove dateContainer
-    //header.removeChild(dateContainer);
-
-    const date = new Date(elementDate);
-    const formattedDate = date.toLocaleDateString("en-GB", dateFormat);
-    input.value = formattedDate;
-    dateSelected = elementDate;
-
-    //close the calendar
-    //datepicker.classList.remove("open");
-
-    setActiveDate(event);
-
-    monthSelected = elementDate.split("-")[1];
-    yearSelected = elementDate.split("-")[0];
-
-    //set the month and year selected
-    dateContainer.textContent = "";
-
-    const hebrewDayOfWeek = daysShort[date.getDay()];
-    const longDateText = `יום ${hebrewDayOfWeek}, ${date.getDate()} ב${
-      monthsShort[Number(monthSelected) - 1]
-    }`;
-    dateContainer.textContent = longDateText;
-
-    header.appendChild(dateContainer);
-  }
-});
-
-datepicker.addEventListener("click", function (event) {
-  if (!event.target.closest(".datepicker-container")) {
-    datepicker.classList.remove("open");
-  }
-});
-
-headerDateContainer.addEventListener("click", (evt) => {
-  evt.stopPropagation();
-  body.innerHTML = "";
-  setHeaderDateContainerToMonthView();
-  generateGridWithMonths();
-});
-
-nextButton.addEventListener("click", (evt) => {
-  const isMonthView =
-    document.querySelector(".datepicker-header-text").textContent.indexOf(" ") >
-    0;
-  if (isMonthView) {
-    arrowButtonHandler("next", "month");
-  } else {
-    arrowButtonHandler("next", "year");
-  }
-});
-
-previousButton.addEventListener("click", (evt) => {
-  const isMonthView =
-    document.querySelector(".datepicker-header-text").textContent.indexOf(" ") >
-    0;
-  if (isMonthView) {
-    arrowButtonHandler("prev", "month");
-  } else {
-    arrowButtonHandler("prev", "year");
-  }
-});
-
-// ok button
-okButton.addEventListener("click", (evt) => {
-  evt.stopPropagation();
-  datepicker.classList.remove("open");
-});
-
-// cancel button
-cancelButton.addEventListener("click", (evt) => {
-  evt.stopPropagation();
-  datepicker.classList.remove("open");
-});
-
-//on yearButton click, show year view
-yearButton.addEventListener("click", (evt) => {
-  evt.stopPropagation();
-  body.innerHTML = "";
-  generateYearView();
+const datepicker = new Datepicker("#datepicker-input", {
+  minDate: "2004-12-05",
+  maxDate: "2033-11-21",
+  okButtonText: "בחר",
+  cancelButtonText: "בטל",
 });
