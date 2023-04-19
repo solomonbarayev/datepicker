@@ -35,6 +35,7 @@ class Datepicker {
     this.yearButton = document.createElement("button");
     this.yearButton.classList.add("datepicker-year");
     this.yearButton.textContent = this.yearSelected;
+    this.setAriaLabel(this.yearButton, this.yearSelected);
     this.days = document.createElement("div");
     this.days.classList.add("datepicker-days");
     //build function to render days of week
@@ -44,9 +45,11 @@ class Datepicker {
     this.previousButton = document.createElement("button");
     this.previousButton.classList.add("datepicker-previous");
     this.previousButton.textContent = "<";
+    this.setAriaLabel(this.previousButton, "navigate previous");
     this.nextButton = document.createElement("button");
     this.nextButton.classList.add("datepicker-next");
     this.nextButton.textContent = ">";
+    this.setAriaLabel(this.nextButton, "navigate next");
     this.headerDateContainer = document.createElement("button");
     this.headerDateContainer.classList.add("datepicker-header-text");
     this.headerDateContainer.textContent = `${
@@ -57,10 +60,11 @@ class Datepicker {
     this.okButton = document.createElement("button");
     this.okButton.classList.add("datepicker-footer__button");
     this.okButton.textContent = this.options.okButtonText || "OK";
+    this.setAriaLabel(this.okButton, this.okButton.textContent);
     this.cancelButton = document.createElement("button");
     this.cancelButton.classList.add("datepicker-footer__button");
     this.cancelButton.textContent = this.options.cancelButtonText || "Cancel";
-
+    this.setAriaLabel(this.cancelButton, this.cancelButton.textContent);
     //month elements
     this.monthView = document.createElement("div");
     this.monthView.classList.add("month-view");
@@ -137,6 +141,14 @@ class Datepicker {
     }
   }
 
+  setAriaLabel(element, text) {
+    element.setAttribute("aria-label", text);
+  }
+
+  setAriaDisabled(element) {
+    element.setAttribute("aria-disabled", true);
+  }
+
   renderCalendar(month = this.monthToday, year = this.yearToday) {
     this.body.innerHTML = "";
     this.renderNavigation("day");
@@ -156,11 +168,12 @@ class Datepicker {
       const day = document.createElement("div");
       day.classList.add("datepicker-day");
       this.calendar.appendChild(day);
+      this.setAriaLabel(day, "non date");
     }
 
     //render days in month
     for (let i = 1; i <= daysInMonth; i++) {
-      const day = document.createElement("div");
+      const day = document.createElement("button");
       day.classList.add("datepicker-day");
       let currentDate = `${this.yearSelected}-${
         Number(this.monthSelected) + 1
@@ -168,6 +181,9 @@ class Datepicker {
       day.setAttribute("data-date", currentDate);
       if (this.checkIfDayDisable(currentDate)) {
         day.classList.add("disabled");
+        day.setAttribute("disabled", true);
+
+        this.setAriaDisabled(day);
       }
       day.textContent = i;
       this.calendar.appendChild(day);
@@ -176,6 +192,8 @@ class Datepicker {
       this.body.append(this.calendar);
 
       this.headerDateContainer.classList.remove("month-render");
+
+      this.setAriaLabel(day, currentDate);
     }
   }
 
@@ -200,6 +218,10 @@ class Datepicker {
         months[this.monthSelected] + " " + this.yearSelected;
       // this.body.appendChild(this.bodyHeader);
     }
+    this.setAriaLabel(
+      this.headerDateContainer,
+      this.headerDateContainer.textContent
+    );
 
     this.body.prepend(this.bodyHeader);
   }
@@ -242,14 +264,17 @@ class Datepicker {
     this.renderNavigation("month");
 
     for (let i = 0; i < monthsShort.length; i++) {
-      const month = document.createElement("div");
+      const month = document.createElement("button");
       month.classList.add("month-gridview");
       if (this.checkIfMonthDisabled(i)) {
         month.classList.add("disabled");
+        month.setAttribute("disabled", true);
+        this.setAriaDisabled(month);
       }
       month.setAttribute("data-month", i);
       month.textContent = monthsShort[i];
       this.monthViewGrid.appendChild(month);
+      this.setAriaLabel(month, `month = ${i}`);
     }
     this.body.appendChild(this.monthViewGrid);
 
@@ -260,6 +285,7 @@ class Datepicker {
 
   updateYearButton() {
     this.yearButton.textContent = this.yearSelected;
+    this.setAriaLabel(this.yearButton, this.yearSelected);
   }
 
   setActiveYear(e) {
@@ -290,15 +316,18 @@ class Datepicker {
     this.yearBody.innerHTML = "";
 
     for (let i = Number(this.minYear); i <= Number(this.maxYear); i++) {
-      const year = document.createElement("div");
+      const year = document.createElement("button");
       year.classList.add("year-option");
       year.setAttribute("data-year", i);
+      year.setAttribute("aria-label", i);
       year.textContent = i;
       this.yearBody.appendChild(year);
 
       if (i == Number(this.yearSelected)) {
         year.classList.add("active-year");
       }
+
+      this.setAriaLabel(year, `year = ${i}`);
     }
 
     this.body.appendChild(this.yearBody);
@@ -470,8 +499,8 @@ class Datepicker {
 }
 
 const datepicker = new Datepicker("#datepicker-input", {
+  minDate: "2024-12-05",
   maxDate: "2033-11-21",
-  minDate: "2010-02-05",
   okButtonText: "בחר",
   cancelButtonText: "בטל",
 });

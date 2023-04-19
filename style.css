@@ -5,6 +5,12 @@
   border-radius: 5px;
 }
 
+/*reset default styles for buttons*/
+button {
+  all: unset;
+  text-align: center;
+}
+
 /* Datepicker*/
 
 .datepicker * {
