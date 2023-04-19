@@ -162,10 +162,13 @@ class Datepicker {
     for (let i = 1; i <= daysInMonth; i++) {
       const day = document.createElement("div");
       day.classList.add("datepicker-day");
-      day.setAttribute(
-        "data-date",
-        `${this.yearSelected}-${Number(this.monthSelected) + 1}-${i}`
-      );
+      let currentDate = `${this.yearSelected}-${
+        Number(this.monthSelected) + 1
+      }-${i}`;
+      day.setAttribute("data-date", currentDate);
+      if (this.checkIfDayDisable(currentDate)) {
+        day.classList.add("disabled");
+      }
       day.textContent = i;
       this.calendar.appendChild(day);
       this.setActiveStates(day, this.dateSelected);
@@ -202,23 +205,6 @@ class Datepicker {
   }
 
   checkIfMonthDisabled(month) {
-    //if current year selected is max year, disable months after max month
-    // if (
-    //   this.yearSelected == this.maxYear ||
-    //   this.yearSelected == this.minYear
-    // ) {
-    //   if (
-    //     month + 1 >= this.maxMonth ||
-    //     month + 1 <= Number(this.minMonth) - 1
-    //   ) {
-    //     console.log("month  " + (month + 1));
-    //     console.log("this.maxMonth  " + this.maxMonth);
-    //     console.log("this.minMonth  " + this.minMonth);
-    //     return true;
-    //   }
-    //   return false;
-    // }
-    // return false;
     if (this.yearSelected == this.maxYear) {
       if (month + 1 > this.maxMonth) {
         return true;
@@ -229,6 +215,22 @@ class Datepicker {
       }
       return false;
     }
+  }
+  checkIfDayDisable(date) {
+    const maxDate = new Date(this.maxDate).setDate(
+      new Date(this.maxDate).getDate()
+    );
+    //adding one day less to minDate
+    const minDate = new Date(this.minDate).setDate(
+      new Date(this.minDate).getDate() - 1
+    );
+
+    if (minDate > new Date(date)) {
+      return true;
+    } else if (maxDate < new Date(date)) {
+      return true;
+    }
+    return false;
   }
 
   renderMonthView(e) {
@@ -266,7 +268,9 @@ class Datepicker {
 
     this.updateYearButton();
 
-    if (e.target.classList.contains("year-option")) {
+    let notYearOption = !e.target.getAttribute("data-year");
+
+    if (!notYearOption) {
       const years = [...document.querySelectorAll(".year-option")];
       years.forEach((year) => {
         year.classList.remove("active-year");
@@ -300,7 +304,6 @@ class Datepicker {
     this.body.appendChild(this.yearBody);
 
     this.yearBody.querySelector(".active-year").scrollIntoView({
-      behavior: "smooth",
       block: "center",
       inline: "center",
     });
@@ -467,7 +470,7 @@ class Datepicker {
 }
 
 const datepicker = new Datepicker("#datepicker-input", {
-  maxDate: "2033-11-31",
+  maxDate: "2033-11-21",
   minDate: "2010-02-05",
   okButtonText: "בחר",
   cancelButtonText: "בטל",
