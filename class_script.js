@@ -499,7 +499,7 @@ class Datepicker {
 }
 
 const datepicker = new Datepicker("#datepicker-input", {
-  minDate: "2024-12-05",
+  minDate: "2004-12-05",
   maxDate: "2033-11-21",
   okButtonText: "בחר",
   cancelButtonText: "בטל",
