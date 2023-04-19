@@ -14,14 +14,37 @@ class Datepicker {
     this.minYear = this.minDate.split("-")[0];
     this.minMonth = this.minDate.split("-")[1];
     this.maxMonth = this.maxDate.split("-")[1];
-    this.datepicker = document.createElement("div");
-    this.datepicker.classList.add("datepicker");
     this.dateSelected = this.today;
     this.monthToday = new Date().getMonth();
     this.yearToday = new Date().getFullYear();
     this.monthSelected = this.monthToday;
     this.yearSelected = this.yearToday;
+
+    this.buildHTML();
+    //render initial calendar
+    this.renderCalendar();
+    //add event listeners
+    this.addEventListeners();
+  }
+
+  open() {
+    this.datepicker.classList.add("open");
+  }
+
+  close() {
+    this.datepicker.classList.remove("open");
+  }
+
+  closeOnOverlayClick(e) {
+    if (!e.target.closest(".datepicker-container")) {
+      this.close();
+    }
+  }
+
+  buildHTML() {
     this.dateFormat = { year: "numeric", month: "numeric", day: "numeric" };
+    this.datepicker = document.createElement("div");
+    this.datepicker.classList.add("datepicker");
     this.datepickerContainer = document.createElement("div");
     this.datepickerContainer.classList.add("datepicker-container");
     this.header = document.createElement("div");
@@ -92,25 +115,6 @@ class Datepicker {
     this.datepickerContainer.appendChild(this.footer);
 
     this.monthView.appendChild(this.monthViewGrid);
-
-    //render initial calendar
-    this.renderCalendar();
-    //add event listeners
-    this.addEventListeners();
-  }
-
-  open() {
-    this.datepicker.classList.add("open");
-  }
-
-  close() {
-    this.datepicker.classList.remove("open");
-  }
-
-  closeOnOverlayClick(e) {
-    if (!e.target.closest(".datepicker-container")) {
-      this.close();
-    }
   }
 
   getDefaultMaxDate() {
